@@ -17,8 +17,8 @@ if ($product_id) {
     try {
         // Get product and seller info
         $stmt = $pdo->prepare("
-            SELECT p.*, u.username AS seller_name, u.email AS seller_email, 
-                   c.name AS category_name
+            SELECT p.*, u.username AS seller_name, u.email AS seller_email,
+            c.name AS category_name
             FROM products p
             JOIN users u ON p.user_id = u.id
             JOIN categories c ON p.category_id = c.id
@@ -26,11 +26,11 @@ if ($product_id) {
         ");
         $stmt->execute([$product_id]);
         $product = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         if ($product) {
             // Get related products (same category)
             $stmt = $pdo->prepare("
-                SELECT p.id, p.title, p.price, p.image_url
+                SELECT p.id, p.title, p.price, p.image
                 FROM products p
                 WHERE p.category_id = ? AND p.id != ? AND p.status = 'available'
                 ORDER BY RAND() LIMIT 4
@@ -43,31 +43,28 @@ if ($product_id) {
     }
 }
 
-// Handle contact form submission
-$contact_message = '';
-$contact_error = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['send_message'])) {
-    $name = trim($_POST['name']);
-    $email = trim($_POST['email']);
-    $message = trim($_POST['message']);
+// Handle add to cart
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
+    redirectIfNotLoggedIn();
     
-    if (empty($name) || empty($email) || empty($message)) {
-        $contact_error = 'All fields are required.';
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $contact_error = 'Please enter a valid email address.';
-    } else {
-        // In a real application, you would send an email here
-        // For now, we'll just store in session
-        $_SESSION['contact_message'] = [
-            'product_id' => $product_id,
-            'name' => $name,
-            'email' => $email,
-            'message' => $message
-        ];
-        
-        $contact_message = 'Your message has been sent to the seller!';
+    // Initialize cart if not exists
+    if (!isset($_SESSION['cart'])) {
+        $_SESSION['cart'] = [];
     }
+    
+    // Add product to cart
+    $product_id = (int)$_POST['product_id'];
+    $quantity = isset($_POST['quantity']) ? max(1, (int)$_POST['quantity']) : 1;
+    
+    if (isset($_SESSION['cart'][$product_id])) {
+        $_SESSION['cart'][$product_id] += $quantity;
+    } else {
+        $_SESSION['cart'][$product_id] = $quantity;
+    }
+    
+    $_SESSION['success_message'] = 'Product added to cart!';
+    header("Location: view.php?id=$product_id");
+    exit();
 }
 
 $page_title = $product['title'] ?? 'Product Details';
@@ -85,33 +82,45 @@ require_once __DIR__ . '/../includes/header.php';
             <!-- Product Images -->
             <div class="col-md-6">
                 <div class="card mb-4">
-                    <?php if (!empty($product['image_url'])): ?>
-                        <img src="<?= htmlspecialchars($product['image_url']) ?>" 
-                             class="card-img-top" 
+                    <?php if (!empty($product['image'])): ?>
+                        <img src="<?= BASE_URL . 'assets/images/' . htmlspecialchars($product['image']) ?>" 
+                             class="card-img-top product-detail-image"
                              alt="<?= htmlspecialchars($product['title']) ?>">
                     <?php else: ?>
                         <div class="text-center p-5 bg-light">
-                            <i class="fas fa-image fa-5x text-muted"></i>
+                            <img src="<?= BASE_URL ?>assets/images/placeholder.png" 
+                                 class="img-fluid"
+                                 alt="No image available">
                             <p class="mt-3">No image available</p>
                         </div>
                     <?php endif; ?>
                     
                     <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <span class="h4 text-success">R <?= number_format($product['price'], 2) ?></span>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="h3 text-success">R <?= number_format($product['price'], 2) ?></span>
                             <span class="badge bg-<?= $product['status'] === 'available' ? 'success' : 'danger' ?>">
                                 <?= ucfirst($product['status']) ?>
                             </span>
                         </div>
                         
-                        <div class="mt-3">
-                            <button class="btn btn-primary w-100 mb-2">
-                                <i class="fas fa-shopping-cart me-2"></i>Buy Now
-                            </button>
-                            
-                            <?php if (isLoggedIn() && $_SESSION['user_id'] != $product['user_id']): ?>
-                                <button class="btn btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#contactModal">
-                                    <i class="fas fa-envelope me-2"></i>Contact Seller
+                        <div class="mt-4">
+                            <?php if ($product['status'] === 'available'): ?>
+                                <form method="POST" class="d-flex align-items-center">
+                                    <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
+                                    
+                                    <div class="me-2" style="width: 100px;">
+                                        <label for="quantity" class="form-label">Quantity</label>
+                                        <input type="number" class="form-control" id="quantity" 
+                                               name="quantity" value="1" min="1">
+                                    </div>
+                                    
+                                    <button type="submit" name="add_to_cart" class="btn btn-primary w-100">
+                                        <i class="fas fa-shopping-cart me-2"></i>Add to Cart
+                                    </button>
+                                </form>
+                            <?php else: ?>
+                                <button class="btn btn-secondary w-100" disabled>
+                                    Not Available
                                 </button>
                             <?php endif; ?>
                         </div>
@@ -146,7 +155,7 @@ require_once __DIR__ . '/../includes/header.php';
                                         <strong><?= htmlspecialchars($product['seller_name']) ?></strong>
                                     </p>
                                     <p class="mb-0 text-muted">
-                                        Member since <?= date('M Y', strtotime($product['created_at'])) ?>
+                                        Contact: <?= htmlspecialchars($product['contact_phone']) ?>
                                     </p>
                                 </div>
                             </div>
@@ -165,14 +174,16 @@ require_once __DIR__ . '/../includes/header.php';
                         <div class="col">
                             <div class="card h-100">
                                 <a href="view.php?id=<?= $related['id'] ?>">
-                                    <?php if (!empty($related['image_url'])): ?>
-                                        <img src="<?= htmlspecialchars($related['image_url']) ?>" 
-                                             class="card-img-top" 
+                                    <?php if (!empty($related['image'])): ?>
+                                        <img src="<?= BASE_URL . 'assets/images/' . htmlspecialchars($related['image']) ?>" 
+                                             class="card-img-top"
                                              alt="<?= htmlspecialchars($related['title']) ?>"
                                              style="height: 150px; object-fit: cover;">
                                     <?php else: ?>
                                         <div class="text-center p-3 bg-light" style="height: 150px;">
-                                            <i class="fas fa-image fa-3x text-muted"></i>
+                                            <img src="<?= BASE_URL ?>assets/images/placeholder.png" 
+                                                 class="img-fluid h-100"
+                                                 alt="No image">
                                         </div>
                                     <?php endif; ?>
                                 </a>
@@ -190,65 +201,6 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
             </div>
         <?php endif; ?>
-        
-        <!-- Contact Seller Modal -->
-        <div class="modal fade" id="contactModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Contact Seller</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form method="POST">
-                        <div class="modal-body">
-                            <p>Contact seller about: <strong><?= htmlspecialchars($product['title']) ?></strong></p>
-                            
-                            <?php if ($contact_message): ?>
-                                <div class="alert alert-success"><?= $contact_message ?></div>
-                            <?php endif; ?>
-                            
-                            <?php if ($contact_error): ?>
-                                <div class="alert alert-danger"><?= $contact_error ?></div>
-                            <?php endif; ?>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Your Name</label>
-                                <input type="text" name="name" class="form-control" 
-                                       value="<?= isLoggedIn() ? htmlspecialchars($_SESSION['username']) : '' ?>"
-                                       required>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Your Email</label>
-                                <input type="email" name="email" class="form-control" 
-                                       value="<?= isLoggedIn() ? htmlspecialchars($_SESSION['email'] ?? '') : '' ?>"
-                                       required>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Message</label>
-                                <textarea name="message" class="form-control" rows="5" required>Hi, I'm interested in your product "<?= htmlspecialchars($product['title']) ?>". Please provide more details.</textarea>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" name="send_message" class="btn btn-primary">Send Message</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Activate modal if there was an error -->
-        <?php if ($contact_error): ?>
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    var contactModal = new bootstrap.Modal(document.getElementById('contactModal'));
-                    contactModal.show();
-                });
-            </script>
-        <?php endif; ?>
-        
     <?php endif; ?>
 </div>
 

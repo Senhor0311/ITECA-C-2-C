@@ -33,6 +33,17 @@
                             </li>
                         <?php endif; ?>
                         <li class="nav-item">
+                            <a class="nav-link position-relative" href="<?php echo BASE_URL; ?>cart.php">
+                                Cart
+                                <?php if (isset($_SESSION['cart']) && count($_SESSION['cart']) > 0): ?>
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        <?= count($_SESSION['cart']) ?>
+                                        <span class="visually-hidden">items in cart</span>
+                                    </span>
+                                <?php endif; ?>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="<?php echo BASE_URL; ?>users/profile.php">Profile</a>
                         </li>
                         <li class="nav-item">

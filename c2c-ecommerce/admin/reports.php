@@ -2,45 +2,79 @@
 require_once '../includes/config.php';
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
-
 redirectIfNotAdmin();
+
+// Fetch report data
+$stmt = $pdo->query("SELECT c.name, COUNT(p.id) as product_count 
+                     FROM categories c 
+                     LEFT JOIN products p ON c.id = p.category_id 
+                     GROUP BY c.id 
+                     ORDER BY product_count DESC");
+$category_report = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$stmt = $pdo->query("SELECT u.username, COUNT(p.id) as product_count 
+                     FROM users u 
+                     LEFT JOIN products p ON u.id = p.user_id 
+                     GROUP BY u.id 
+                     ORDER BY product_count DESC 
+                     LIMIT 10");
+$user_report = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 require_once '../includes/header.php';
 ?>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <!-- Same navigation bar as dashboard.php -->
-</nav>
-
 <div class="container mt-4">
-    <h2>Generate Reports</h2>
-    <form method="POST" action="generate_report.php">
-        <div class="row">
-            <div class="col-md-4">
-                <label>Report Type</label>
-                <select class="form-control" name="report_type" required>
-                    <option value="">Select Report</option>
-                    <option value="sales">Sales Report</option>
-                    <option value="users">User Activity Report</option>
-                    <option value="products">Product Listing Report</option>
-                    <option value="transactions">Transaction Report</option>
-                </select>
-            </div>
-            <div class="col-md-4">
-                <label>Start Date</label>
-                <input type="date" name="start_date" class="form-control">
-            </div>
-            <div class="col-md-4">
-                <label>End Date</label>
-                <input type="date" name="end_date" class="form-control">
+    <h2 class="mb-4">Reports</h2>
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Products by Category</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Product Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($category_report as $row): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($row['name']); ?></td>
+                                <td><?php echo $row['product_count']; ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             </div>
         </div>
-        <div class="row mt-3">
-            <div class="col-md-12">
-                <button type="submit" class="btn btn-primary">Generate Report</button>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <h3>Top 10 Users by Product Listings</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Product Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($user_report as $row): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($row['username']); ?></td>
+                                <td><?php echo $row['product_count']; ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             </div>
         </div>
-    </form>
+    </div>
 </div>
 
 <?php require_once '../includes/footer.php'; ?>

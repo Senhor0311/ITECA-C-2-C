@@ -6,6 +6,11 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Initialize cart if not exists
+if (!isset($_SESSION['cart'])) {
+    $_SESSION['cart'] = [];
+}
+
 require_once 'db.php';
 
 /**
@@ -21,8 +26,7 @@ function isLoggedIn() {
  * @return bool True if user is admin
  */
 function isAdmin() {
-    return isLoggedIn() && isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === '1';
-    header("location: admin/dashboard.php");
+    return isLoggedIn() && isset($_SESSION['is_admin']) && $_SESSION['is_admin'] == 1;
 }
 
 /**
@@ -40,14 +44,18 @@ function redirectIfNotLoggedIn() {
  */
 function redirectIfNotAdmin() {
     if (!isAdmin()) {
+        $_SESSION['error_message'] = 'Access denied: Admin privileges required';
         header('Location: ' . BASE_URL);
         exit();
     }
 }
 
+/**
+ * Redirect to admin dashboard if user is admin
+ */
 function redirectIfAdmin(){
     if(isAdmin()){
-        header("location:admin/dashboard.php");
+        header("Location: " . BASE_URL . "admin/dashboard.php");
         exit();
     }
 }

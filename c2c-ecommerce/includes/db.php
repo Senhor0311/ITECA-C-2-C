@@ -2,7 +2,7 @@
 require_once 'config.php';
 
 $host = 'localhost';
-$dbname = 'c2c_ecommerce';
+$dbname = 'South_Africa_C2C';
 $username = 'root';
 $password = '';
 
