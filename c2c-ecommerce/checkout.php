@@ -8,7 +8,6 @@ redirectIfNotLoggedIn();
 $errors = [];
 $success_message = '';
 
-// Handle purchase confirmation
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_purchase'])) {
     if (empty($_SESSION['cart'])) {
         $errors['general'] = 'Your cart is empty.';
@@ -18,7 +17,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_purchase'])) 
             $product_ids = array_keys($_SESSION['cart']);
             $placeholders = implode(',', array_fill(0, count($product_ids), '?'));
 
-            // Fetch current quantities
             $stmt = $pdo->prepare("
                 SELECT id, quantity
                 FROM products
@@ -33,7 +31,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_purchase'])) 
                 $products_by_id[$product['id']] = $product['quantity'];
             }
 
-            // Validate quantities
             foreach ($_SESSION['cart'] as $product_id => $cart_quantity) {
                 if (!isset($products_by_id[$product_id])) {
                     throw new Exception("Product ID $product_id is not available.");
@@ -44,7 +41,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_purchase'])) 
                 }
             }
 
-            // Update quantities
             foreach ($_SESSION['cart'] as $product_id => $cart_quantity) {
                 $new_quantity = max(1, $products_by_id[$product_id] - $cart_quantity);
                 $stmt = $pdo->prepare("UPDATE products SET quantity = ? WHERE id = ?");
@@ -52,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_purchase'])) 
             }
 
             $pdo->commit();
-            $_SESSION['cart'] = []; // Clear cart
+            $_SESSION['cart'] = []; 
             $success_message = 'Purchase confirmed! Your cart has been cleared. Please contact the sellers to finalize payment and delivery.';
         } catch (Exception $e) {
             $pdo->rollBack();
@@ -61,7 +57,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_purchase'])) 
     }
 }
 
-// Get cart products
 $cart_items = [];
 $cart_total = 0;
 
