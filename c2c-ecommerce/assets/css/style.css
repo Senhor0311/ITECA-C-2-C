@@ -1,4 +1,3 @@
-/* General Styles */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f8f9fa;
@@ -8,12 +7,10 @@ body {
     padding-bottom: 2rem;
 }
 
-/* Navbar */
 .navbar {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Cards */
 .card {
     border: none;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -25,7 +22,6 @@ body {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
-/* Product Images */
 .product-image {
     height: 200px;
     object-fit: cover;
@@ -36,34 +32,28 @@ body {
     object-fit: contain;
 }
 
-/* Hero Section */
 .hero-section {
     background-color: #e9ecef;
     border-radius: 0.5rem;
 }
 
-/* Badges */
 .badge {
     font-size: 0.9rem;
     font-weight: normal;
 }
 
-/* Forms */
 .form-control, .form-select {
     padding: 0.5rem 0.75rem;
 }
 
-/* Tables */
 .table {
     margin-bottom: 0;
 }
 
-/* Footer */
 footer {
     margin-top: 2rem;
 }
 
-/* Admin Dashboard */
 .card-title {
     font-size: 1.25rem;
     margin-bottom: 0.5rem;
@@ -76,7 +66,6 @@ footer {
     background-color: rgba(0, 0, 0, 0.05);
 }
 
-/* Responsive Adjustments */
 @media (max-width: 768px) {
     .product-image {
         height: 150px;
