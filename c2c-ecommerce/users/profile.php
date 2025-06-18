@@ -8,7 +8,6 @@ redirectIfNotLoggedIn();
 $user_id = $_SESSION['user_id'];
 $errors = [];
 
-// Fetch user data
 $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
 $stmt->execute([$user_id]);
 $user = $stmt->fetch();
@@ -18,7 +17,6 @@ if (!$user) {
     exit();
 }
 
-// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username']);
     $email = trim($_POST['email']);
@@ -28,7 +26,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $new_password = $_POST['new_password'];
     $confirm_password = $_POST['confirm_password'];
 
-    // Basic validation
     if (empty($username)) {
         $errors['username'] = 'Username is required';
     }
@@ -43,7 +40,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors['phone'] = 'Phone number is required';
     }
 
-    // Check if password is being changed
     $password_changed = false;
     if (!empty($current_password) || !empty($new_password) || !empty($confirm_password)) {
         if (empty($current_password)) {
@@ -67,7 +63,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Check if username or email already exists (excluding current user)
     $stmt = $pdo->prepare("SELECT id FROM users WHERE (username = ? OR email = ?) AND id != ?");
     $stmt->execute([$username, $email, $user_id]);
     if ($stmt->fetch()) {
@@ -75,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($errors)) {
-        // Update user data
+       
         if ($password_changed) {
             $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare("UPDATE users SET username = ?, email = ?, phone = ?, address = ?, password = ? WHERE id = ?");
@@ -85,7 +80,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$username, $email, $phone, $address, $user_id]);
         }
 
-        // Update session data
         $_SESSION['username'] = $username;
 
         $_SESSION['success_message'] = 'Profile updated successfully!';
@@ -171,7 +165,6 @@ require_once '../includes/header.php';
                 </div>
                 <div class="card-body">
                     <?php
-                    // Fetch user's products
                     $stmt = $pdo->prepare("SELECT p.*, c.name as category_name 
                                          FROM products p 
                                          JOIN categories c ON p.category_id = c.id 
