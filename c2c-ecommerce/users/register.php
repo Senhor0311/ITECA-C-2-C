@@ -21,7 +21,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $confirm_password = $_POST['confirm_password'];
     $address = trim($_POST['address']);
 
-    // Validation
     if (empty($username)) {
         $errors['username'] = 'Username is required';
     } elseif (strlen($username) < 3) {
@@ -48,7 +47,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors['confirm_password'] = 'Passwords do not match';
     }
 
-    // Check if username or email exists
     $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
     $stmt->execute([$username, $email]);
     if ($stmt->fetch()) {
