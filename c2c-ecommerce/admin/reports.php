@@ -4,7 +4,6 @@ require_once '../includes/db.php';
 require_once '../includes/auth.php';
 redirectIfNotAdmin();
 
-// Fetch report data
 $stmt = $pdo->query("SELECT c.name, COUNT(p.id) as product_count 
                      FROM categories c 
                      LEFT JOIN products p ON c.id = p.category_id 
