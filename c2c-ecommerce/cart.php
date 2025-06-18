@@ -1,12 +1,10 @@
 <?php
-// cart.php
 require_once 'includes/config.php';
 require_once 'includes/db.php';
 require_once 'includes/auth.php';
 
 redirectIfNotLoggedIn();
 
-// Handle cart updates
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['update_cart'])) {
         foreach ($_POST['quantities'] as $product_id => $quantity) {
@@ -20,17 +18,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     } elseif (isset($_POST['remove_item'])) {
-        // Fix: Use $_POST['remove_item'] instead of $_POST['product_id']
+        
         $product_id = (int)$_POST['remove_item'];
         unset($_SESSION['cart'][$product_id]);
     } elseif (isset($_POST['checkout'])) {
-        // Handle checkout process
+        
         header('Location: checkout.php');
         exit();
     }
 }
 
-// Get cart products
 $cart_items = [];
 $cart_total = 0;
 
@@ -104,7 +101,6 @@ require_once 'includes/header.php';
                                         </td>
                                         <td>R <?= number_format($item['total'], 2) ?></td>
                                         <td>
-                                            <!-- Fix: Button now says "Remove" instead of showing a trash icon -->
                                             <button type="submit" name="remove_item" class="btn btn-danger btn-sm"
                                                     value="<?= $item['id'] ?>">
                                                 Remove
