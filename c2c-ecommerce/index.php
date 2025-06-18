@@ -3,7 +3,6 @@ require_once 'includes/config.php';
 require_once 'includes/db.php';
 require_once 'includes/auth.php';
 
-// Fetch featured products
 $stmt = $pdo->prepare("SELECT p.*, u.username, c.name as category_name 
                        FROM products p 
                        JOIN users u ON p.user_id = u.id 
@@ -14,7 +13,6 @@ $stmt = $pdo->prepare("SELECT p.*, u.username, c.name as category_name
 $stmt->execute();
 $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Fetch categories
 $stmt = $pdo->query("SELECT * FROM categories LIMIT 5");
 $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
