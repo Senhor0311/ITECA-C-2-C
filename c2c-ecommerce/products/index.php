@@ -6,7 +6,6 @@ require_once '../includes/auth.php';
 $category_id = isset($_GET['category']) ? (int)$_GET['category'] : null;
 $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
 
-// Build query based on filters
 $query = "SELECT p.*, u.username, c.name as category_name 
           FROM products p 
           JOIN users u ON p.user_id = u.id 
@@ -32,7 +31,6 @@ $stmt = $pdo->prepare($query);
 $stmt->execute($params);
 $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Fetch all categories for filter
 $stmt = $pdo->query("SELECT * FROM categories ORDER BY name");
 $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
