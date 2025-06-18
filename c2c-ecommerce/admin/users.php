@@ -7,7 +7,6 @@ redirectIfNotAdmin();
 $errors = [];
 $success_message = '';
 
-// Handle user deletion
 if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
     $user_id = (int)$_GET['delete'];
     $stmt = $pdo->prepare("DELETE FROM users WHERE id = ? AND is_admin = '0'");
@@ -18,7 +17,6 @@ if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
     }
 }
 
-// Fetch all users
 $stmt = $pdo->query("SELECT id, username, email, phone, is_admin FROM users ORDER BY username");
 $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
