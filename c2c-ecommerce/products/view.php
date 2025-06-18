@@ -1,13 +1,10 @@
 <?php
-// products/view.php
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/auth.php';
 
-// Get product ID from URL
 $product_id = $_GET['id'] ?? 0;
 
-// Fetch product details
 $product = [];
 $seller = [];
 $category = '';
@@ -15,7 +12,6 @@ $related_products = [];
 
 if ($product_id) {
     try {
-        // Get product and seller info
         $stmt = $pdo->prepare("
             SELECT p.*, u.username AS seller_name, u.email AS seller_email,
             c.name AS category_name
@@ -28,7 +24,6 @@ if ($product_id) {
         $product = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($product) {
-            // Get related products (same category)
             $stmt = $pdo->prepare("
                 SELECT p.id, p.title, p.price, p.image
                 FROM products p
@@ -43,16 +38,13 @@ if ($product_id) {
     }
 }
 
-// Handle add to cart
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
     redirectIfNotLoggedIn();
-    
-    // Initialize cart if not exists
+
     if (!isset($_SESSION['cart'])) {
         $_SESSION['cart'] = [];
     }
-    
-    // Add product to cart
+
     $product_id = (int)$_POST['product_id'];
     $quantity = isset($_POST['quantity']) ? max(1, (int)$_POST['quantity']) : 1;
     
@@ -77,9 +69,9 @@ require_once __DIR__ . '/../includes/header.php';
             Product not found. <a href="../products/">Browse all products</a>
         </div>
     <?php else: ?>
-        <!-- Product Details Section -->
+        
         <div class="row">
-            <!-- Product Images -->
+            
             <div class="col-md-6">
                 <div class="card mb-4">
                     <?php if (!empty($product['image'])): ?>
@@ -127,8 +119,7 @@ require_once __DIR__ . '/../includes/header.php';
                     </div>
                 </div>
             </div>
-            
-            <!-- Product Information -->
+       
             <div class="col-md-6">
                 <div class="card mb-4">
                     <div class="card-body">
@@ -165,7 +156,6 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
         </div>
         
-        <!-- Related Products -->
         <?php if (!empty($related_products)): ?>
             <div class="mt-5">
                 <h3>Related Products</h3>
