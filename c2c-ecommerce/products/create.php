@@ -13,7 +13,6 @@ $category_id = '';
 $contact_phone = '';
 $quantity = '1'; // Default quantity
 
-// Fetch categories
 $stmt = $pdo->query("SELECT * FROM categories ORDER BY name");
 $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -25,7 +24,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $contact_phone = trim($_POST['contact_phone']);
     $quantity = trim($_POST['quantity']);
 
-    // Validation
     if (empty($title)) {
         $errors['title'] = 'Title is required';
     } elseif (strlen($title) < 5) {
@@ -58,7 +56,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors['quantity'] = 'Quantity must be a number greater than or equal to 1';
     }
 
-    // Handle file upload
     $image = null;
     if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
         $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
