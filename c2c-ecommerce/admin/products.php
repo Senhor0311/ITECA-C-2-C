@@ -7,7 +7,6 @@ redirectIfNotAdmin();
 $errors = [];
 $success_message = '';
 
-// Handle product deletion
 if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
     $product_id = (int)$_GET['delete'];
     $stmt = $pdo->prepare("DELETE FROM products WHERE id = ?");
@@ -18,7 +17,6 @@ if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
     }
 }
 
-// Fetch all products with category and user details
 $stmt = $pdo->query("
     SELECT p.id, p.title, p.price, p.quantity, p.status, c.name AS category_name, u.username
     FROM products p
