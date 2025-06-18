@@ -8,7 +8,6 @@ $errors = [];
 $success_message = '';
 $name = '';
 
-// Handle category creation
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name']);
     if (empty($name)) {
@@ -26,7 +25,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Handle category deletion
 if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
     $category_id = (int)$_GET['delete'];
     $stmt = $pdo->prepare("DELETE FROM categories WHERE id = ?");
@@ -37,7 +35,6 @@ if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
     }
 }
 
-// Fetch all categories
 $stmt = $pdo->query("SELECT * FROM categories ORDER BY name");
 $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
