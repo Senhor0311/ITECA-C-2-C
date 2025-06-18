@@ -12,7 +12,6 @@ if (!isset($_GET['id'])) {
 
 $product_id = (int)$_GET['id'];
 
-// Verify product belongs to user
 $stmt = $pdo->prepare("SELECT image FROM products WHERE id = ? AND user_id = ?");
 $stmt->execute([$product_id, $_SESSION['user_id']]);
 $product = $stmt->fetch();
@@ -22,7 +21,6 @@ if (!$product) {
     exit();
 }
 
-// Delete product
 $stmt = $pdo->prepare("DELETE FROM products WHERE id = ?");
 if ($stmt->execute([$product_id])) {
     // Delete image file if it exists
