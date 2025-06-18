@@ -12,7 +12,6 @@ if (!isset($_GET['id'])) {
 
 $product_id = (int)$_GET['id'];
 
-// Fetch product details
 $stmt = $pdo->prepare("SELECT * FROM products WHERE id = ? AND user_id = ?");
 $stmt->execute([$product_id, $_SESSION['user_id']]);
 $product = $stmt->fetch();
@@ -31,7 +30,6 @@ $contact_phone = $product['contact_phone'];
 $current_image = $product['image'];
 $quantity = $product['quantity'];
 
-// Fetch categories
 $stmt = $pdo->query("SELECT * FROM categories ORDER BY name");
 $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -43,7 +41,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $contact_phone = trim($_POST['contact_phone']);
     $quantity = trim($_POST['quantity']);
 
-    // Validation
     if (empty($title)) {
         $errors['title'] = 'Title is required';
     } elseif (strlen($title) < 5) {
@@ -76,7 +73,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors['quantity'] = 'Quantity must be a number greater than or equal to 1';
     }
 
-    // Handle file upload
     $image = $current_image;
     if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
         $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
@@ -90,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $target_path = $upload_dir . $file_name;
 
             if (move_uploaded_file($_FILES['image']['tmp_name'], $target_path)) {
-                // Delete old image if it exists
+                
                 if ($image && file_exists($upload_dir . $image)) {
                     unlink($upload_dir . $image);
                 }
@@ -101,7 +97,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Handle image removal
     if (isset($_POST['remove_image']) && $_POST['remove_image'] == '1') {
         if ($image && file_exists($upload_dir . $image)) {
             unlink($upload_dir . $image);
