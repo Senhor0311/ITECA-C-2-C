@@ -4,7 +4,6 @@ require_once '../includes/db.php';
 require_once '../includes/auth.php';
 redirectIfNotAdmin();
 
-// Fetch summary data for dashboard
 $stmt = $pdo->query("SELECT COUNT(*) as total_users FROM users");
 $total_users = $stmt->fetch(PDO::FETCH_ASSOC)['total_users'];
 
