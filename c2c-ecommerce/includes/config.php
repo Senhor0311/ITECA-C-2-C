@@ -5,5 +5,5 @@ error_reporting(E_ALL);
 
 session_start();
 
-define('BASE_URL', 'http://localhost/c2c-ecommerce/');
+define('BASE_URL', 'http://southafricac-2-c.infinityfreeapp.com/');
 ?>
