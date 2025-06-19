@@ -1,10 +1,10 @@
 <?php
 require_once 'config.php';
 
-$host = 'localhost';
-$dbname = 'c2c_ecommerce';
-$username = 'root';
-$password = '';
+$host = 'sql211.infinityfree.com';
+$dbname = 'if0_39253904_South_Africa_C2C';
+$username = 'if0_39253904';
+$password = 'eANGvsftslea2Jt';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
